@@ -16,68 +16,98 @@ package com.matteojoliveau.wire;
  * limitations under the License.
  */
 
+import com.matteojoliveau.wire.scraper.TelegramScraper;
+import com.matteojoliveau.wire.scraper.TemplateModel;
+import freemarker.core.UndefinedOutputFormat;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
+import java.util.List;
 
 /**
- * Goal which touches a timestamp file.
- *
- * @goal scrape
- * 
- * @phase generate-sources
+ * Goal which generate Kotlin classes from Telegram documentation.
  */
-@Mojo(name = "telegram-classes-generator")
+@Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class TelegramClassesGeneratorMojo
-    extends AbstractMojo
-{
-    /**
-     * Location of the file.
-     * @parameter expression="${project.build.directory}"
-     * @required
-     */
+        extends AbstractMojo {
+
+    @Parameter(required = true, defaultValue = "${project.build.directory}")
     private File outputDirectory;
 
     public void execute()
-        throws MojoExecutionException
-    {
-        File f = outputDirectory;
+            throws MojoExecutionException {
+        try {
+            final File f = outputDirectory;
 
-        if ( !f.exists() )
-        {
-            f.mkdirs();
-        }
+            final Template template;
+            final String templateFile = "data_class.ftlh";
+            try {
+                template = configureFreemarker().getTemplate(templateFile);
+            } catch (IOException e) {
+                throw new MojoExecutionException("Error reading template file " + templateFile, e);
+            }
 
-        File touch = new File( f, "touch.txt" );
+            if (!f.exists()) {
+                final boolean success = f.mkdirs();
+            }
 
-        FileWriter w = null;
-        try
-        {
-            w = new FileWriter( touch );
+            final File gen = new File(f, "generated-sources/telegram/org/telegram");
 
-            w.write( "touch.txt" );
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( "Error creating file " + touch, e );
-        }
-        finally
-        {
-            if ( w != null )
-            {
-                try
-                {
-                    w.close();
-                }
-                catch ( IOException e )
-                {
-                    // ignore
+            if (!gen.exists()) {
+                final boolean success = gen.mkdirs();
+            }
+
+            final TelegramScraper scraper = new TelegramScraper();
+            final List<TemplateModel> models = scraper.scrape();
+
+            for (TemplateModel model : models) {
+
+                FileWriter w = null;
+                final String className = String.format("%s.kt", model.getTitle());
+                final File modelFile = new File(gen, className);
+                try {
+                    w = new FileWriter(modelFile);
+
+                    template.process(model, w);
+                } catch (IOException e) {
+                    throw new MojoExecutionException("Error creating file " + modelFile.getName(), e);
+                } catch (TemplateException e) {
+                    throw new MojoExecutionException("Error writing template" + className, e);
+                } finally {
+                    if (w != null) {
+                        try {
+                            w.close();
+                        } catch (IOException e) {
+                            // ignore
+                        }
+                    }
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
+
+    private Configuration configureFreemarker() throws IOException {
+        final Configuration cfg = new Configuration(Configuration.VERSION_2_3_27);
+        final URL resource = this.getClass().getResource("/templates");
+        cfg.setDirectoryForTemplateLoading(new File(resource.getFile()));
+        cfg.setWrapUncheckedExceptions(true);
+        cfg.setLogTemplateExceptions(false);
+        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+        cfg.setDefaultEncoding("UTF-8");
+        cfg.setOutputFormat(UndefinedOutputFormat.INSTANCE);
+        return cfg;
     }
 }

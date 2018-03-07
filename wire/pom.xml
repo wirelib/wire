@@ -66,6 +66,20 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.matteojoliveau.wire</groupId>
+                <artifactId>telegram-classes-maven-plugin</artifactId>
+                <version>1.0-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <id>generate-telegra-classes</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
