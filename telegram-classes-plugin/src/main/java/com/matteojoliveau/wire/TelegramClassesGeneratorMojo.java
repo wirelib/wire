@@ -32,7 +32,9 @@ import org.apache.maven.plugins.annotations.Parameter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -52,8 +54,9 @@ public class TelegramClassesGeneratorMojo
 
             final Template template;
             final String templateFile = "data_class.ftlh";
+            final Configuration cfg = configureFreemarker();
             try {
-                template = configureFreemarker().getTemplate(templateFile);
+                template = cfg.getTemplate(templateFile);
             } catch (IOException e) {
                 throw new MojoExecutionException("Error reading template file " + templateFile, e);
             }
@@ -73,29 +76,36 @@ public class TelegramClassesGeneratorMojo
 
             for (TemplateModel model : models) {
 
-                FileWriter w = null;
-                final String className = String.format("%s.kt", model.getTitle());
-                final File modelFile = new File(gen, className);
-                try {
-                    w = new FileWriter(modelFile);
-
-                    template.process(model, w);
-                } catch (IOException e) {
-                    throw new MojoExecutionException("Error creating file " + modelFile.getName(), e);
-                } catch (TemplateException e) {
-                    throw new MojoExecutionException("Error writing template" + className, e);
-                } finally {
-                    if (w != null) {
-                        try {
-                            w.close();
-                        } catch (IOException e) {
-                            // ignore
-                        }
-                    }
-                }
+                processTemplate(template, gen, model);
             }
+
+            final Template response = cfg.getTemplate("response.ftlh");
+            processTemplate(response, gen, new TemplateModel("", Collections.singletonList(new HashMap<>()), null));
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void processTemplate(Template template, File gen, TemplateModel model) throws MojoExecutionException {
+        FileWriter w = null;
+        final String className = String.format("%s.kt", model.getTitle());
+        final File modelFile = new File(gen, className);
+        try {
+            w = new FileWriter(modelFile);
+
+            template.process(model, w);
+        } catch (IOException e) {
+            throw new MojoExecutionException("Error creating file " + modelFile.getName(), e);
+        } catch (TemplateException e) {
+            throw new MojoExecutionException("Error writing template" + className, e);
+        } finally {
+            if (w != null) {
+                try {
+                    w.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
         }
     }
 

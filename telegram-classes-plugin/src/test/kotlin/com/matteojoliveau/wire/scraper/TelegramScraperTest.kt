@@ -4,14 +4,12 @@ import com.google.gson.GsonBuilder
 import freemarker.core.UndefinedOutputFormat
 import freemarker.template.Configuration
 import freemarker.template.TemplateExceptionHandler
-import junit.framework.Assert
 import junit.framework.TestCase
 import java.io.File
-import java.io.StringWriter
 import kotlin.text.Charsets.UTF_8
 
 
-class TelegramScraperTest : TestCase("scraper test") {
+class TelegramScraperTest : TestCase("com.matteojoliveau.wire.scraper test") {
     val sut = TelegramScraper()
     lateinit var cfg: Configuration
 

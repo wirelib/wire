@@ -1,12 +1,13 @@
 package org.telegram
 
-data class ${title}(
-    <#list fields as field>
+<#if !(fields?has_content)>interface ${title}<#else>data class ${title}(
+<#list fields as field>
         /**
         * ${field.description}
         */
         val ${field.field}: ${field.type?no_esc}<#if field?has_next>,
-        </#if>
+</#if>
 
-    </#list>
-)
+</#list>
+)<#if parent??>: ${parent}</#if>
+</#if>
