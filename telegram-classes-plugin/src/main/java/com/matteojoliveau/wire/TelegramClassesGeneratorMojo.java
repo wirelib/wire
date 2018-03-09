@@ -101,8 +101,7 @@ public class TelegramClassesGeneratorMojo
 
     private Configuration configureFreemarker() throws IOException {
         final Configuration cfg = new Configuration(Configuration.VERSION_2_3_27);
-        final URL resource = this.getClass().getResource("/templates");
-        cfg.setDirectoryForTemplateLoading(new File(resource.getFile()));
+        cfg.setClassForTemplateLoading(this.getClass(), "/templates");
         cfg.setWrapUncheckedExceptions(true);
         cfg.setLogTemplateExceptions(false);
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
