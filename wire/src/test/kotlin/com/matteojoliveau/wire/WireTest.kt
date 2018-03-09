@@ -4,10 +4,23 @@ import junit.framework.TestCase
 
 class WireTest : TestCase() {
 
-    val wire = Wire("286303429:AAFj3ImD_5_rXTylf6YfGmVD5Lm_iwu9c6I")
+    val wire = Wire("token")
 
     fun `testTest GetMe`() {
-        val me = wire.getMe()
-        println(me)
+
+        wire.onCommand("pippo") {
+            println("Received message: ${it.message?.text} from ${it.from}")
+        }
+
+        wire.onText("@\\w*") { ctx ->
+            println(ctx.message.toString())
+        }
+        wire.onMention { ctx ->
+            ctx.reply("Ciao ${ctx.mentions.first()}, come stai?").subscribe({ sent ->
+                println("Sent $sent")
+            }, {error -> println("Error: ${error.message}")})
+        }
+
+        wire.start()
     }
 }
