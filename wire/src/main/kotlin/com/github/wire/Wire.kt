@@ -10,11 +10,12 @@ import com.github.wire.internal.InMemoryDispatcher
 import com.github.wire.internal.UpdateDispatcher
 import com.github.wire.telegram.Telegram
 import io.reactivex.functions.Consumer
+import io.reactivex.schedulers.Schedulers
 import mu.KLogging
 import okhttp3.OkHttpClient
 import org.telegram.Update
 
-class Wire(token: String, apiUrl: String = "${Constants.TELEGRAM_API_URL}$token") {
+class Wire @JvmOverloads constructor(token: String, apiUrl: String = "${Defaults.TELEGRAM_API_URL}$token") {
     companion object: KLogging()
 
     private val client = httpClient()
@@ -42,6 +43,7 @@ class Wire(token: String, apiUrl: String = "${Constants.TELEGRAM_API_URL}$token"
         register("/$command", callback)
         return this
     }
+
 
     fun on(updateType: UpdateType, callback: ContextCallback): Wire {
         register(updateType, callback)
@@ -75,22 +77,26 @@ class Wire(token: String, apiUrl: String = "${Constants.TELEGRAM_API_URL}$token"
     }
 
 
+    @JvmOverloads
     fun start(block: Boolean = true) {
         val updates = telegram.start()
         logger.info { "Started polling" }
         if (block) {
             updates.blockingSubscribe(::dispatch, this::onError)
         } else {
-            updates.subscribe(::dispatch, this::onError)
+            updates.subscribeOn(Schedulers.single())
+                    .subscribe(::dispatch, this::onError)
         }
     }
 
-    fun catch(handler: Consumer<in Throwable>) {
+    fun catch(handler: Consumer<in Throwable>): Wire {
         telegram.catch(handler)
+        return this
     }
 
-    fun catch(handler: (t: Throwable) -> Unit) {
+    fun catch(handler: (t: Throwable) -> Unit): Wire {
         telegram.catch(Consumer {handler(it)})
+        return this
     }
 
     private fun dispatch(update: Update) {

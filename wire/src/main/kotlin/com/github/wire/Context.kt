@@ -31,7 +31,7 @@ data class Context(
         get() = message?.entities?.map { message.text?.substring(it.offset, it.offset + it.length) ?: "" }
                 ?: listOf()
 
-    fun reply(text: String, replyMarkup: ReplyMarkup? = null,
+    @JvmOverloads fun reply(text: String, replyMarkup: ReplyMarkup? = null,
               disableWebPagePreview: Boolean? = null,
               disableNotification: Boolean? = null,
               replyToMessageId: Int? = null) = telegram.sendMessage(
@@ -39,7 +39,7 @@ data class Context(
             ?: throwInvalid("chat"),
             text, null, disableWebPagePreview, disableNotification, replyToMessageId, replyMarkup)
 
-    fun replyWithHtml(text: String, replyMarkup: ReplyMarkup? = null,
+    @JvmOverloads fun replyWithHtml(text: String, replyMarkup: ReplyMarkup? = null,
                       disableWebPagePreview: Boolean? = null,
                       disableNotification: Boolean? = null,
                       replyToMessageId: Int? = null) = telegram.sendMessage(
@@ -47,7 +47,7 @@ data class Context(
             ?: throwInvalid("chat"),
             text, ParseMode.HTML, disableWebPagePreview, disableNotification, replyToMessageId, replyMarkup)
 
-    fun answerCallbackQuery(text: String? = null, showAlert: Boolean? = null, url: String? = null, cacheTime: Int? = null) = telegram.answerCallbackQuery(update.callbackQuery?.id
+    @JvmOverloads fun answerCallbackQuery(text: String? = null, showAlert: Boolean? = null, url: String? = null, cacheTime: Int? = null) = telegram.answerCallbackQuery(update.callbackQuery?.id
             ?: throwInvalid("callback query"), text, showAlert, url, cacheTime)
 
     operator fun set(key: String, value: Any) {
