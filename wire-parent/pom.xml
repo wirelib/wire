@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>Wire :: Parent</name>
-    <groupId>com.matteojoliveau.wire</groupId>
+    <groupId>com.github.wirelib</groupId>
     <artifactId>wire-parent</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>

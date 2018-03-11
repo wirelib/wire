@@ -1,12 +1,12 @@
-package com.matteojoliveau.wire.telegram
+package com.github.wire.telegram
 
 import com.github.salomonbrys.kotson.fromJson
 import com.google.gson.Gson
-import com.matteojoliveau.wire.MediaTypes
-import com.matteojoliveau.wire.buildUrl
-import com.matteojoliveau.wire.enums.ParseMode
-import com.matteojoliveau.wire.exception.TelegramException
-import com.matteojoliveau.wire.internal.Poller
+import com.github.wire.MediaTypes
+import com.github.wire.buildUrl
+import com.github.wire.enums.ParseMode
+import com.github.wire.exception.TelegramException
+import com.github.wire.internal.Poller
 import io.reactivex.Observable
 import io.reactivex.functions.Consumer
 import mu.KLogging

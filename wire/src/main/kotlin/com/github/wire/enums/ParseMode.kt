@@ -1,4 +1,4 @@
-package com.matteojoliveau.wire.enums
+package com.github.wire.enums
 
 enum class ParseMode {
     MARKDOWN,

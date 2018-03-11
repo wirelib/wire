@@ -1,11 +1,11 @@
-package com.matteojoliveau.wire.internal
+package com.github.wire.internal
 
-import com.matteojoliveau.wire.Context
-import com.matteojoliveau.wire.ContextCallback
-import com.matteojoliveau.wire.Middleware
-import com.matteojoliveau.wire.enums.MessageEntityType
-import com.matteojoliveau.wire.enums.UpdateType
-import com.matteojoliveau.wire.telegram.Telegram
+import com.github.wire.Context
+import com.github.wire.ContextCallback
+import com.github.wire.Middleware
+import com.github.wire.enums.MessageEntityType
+import com.github.wire.enums.UpdateType
+import com.github.wire.telegram.Telegram
 import mu.KLogging
 import org.telegram.Update
 

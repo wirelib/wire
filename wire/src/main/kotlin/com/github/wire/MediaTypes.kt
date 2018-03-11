@@ -1,4 +1,4 @@
-package com.matteojoliveau.wire
+package com.github.wire
 
 import okhttp3.MediaType
 

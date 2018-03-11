@@ -1,4 +1,4 @@
-package com.matteojoliveau.wire.internal
+package com.github.wire.internal
 
 import org.telegram.Update
 

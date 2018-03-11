@@ -1,7 +1,7 @@
-package com.matteojoliveau.wire.internal
+package com.github.wire.internal
 
-import com.matteojoliveau.wire.ContextCallback
-import com.matteojoliveau.wire.Middleware
+import com.github.wire.ContextCallback
+import com.github.wire.Middleware
 import org.telegram.Update
 
 interface UpdateDispatcher {

@@ -1,8 +1,8 @@
-package com.matteojoliveau.wire
+package com.github.wire
 
-import com.matteojoliveau.wire.enums.ParseMode
-import com.matteojoliveau.wire.enums.UpdateType
-import com.matteojoliveau.wire.telegram.Telegram
+import com.github.wire.enums.ParseMode
+import com.github.wire.enums.UpdateType
+import com.github.wire.telegram.Telegram
 import org.telegram.InlineQuery
 import org.telegram.Message
 import org.telegram.ReplyMarkup

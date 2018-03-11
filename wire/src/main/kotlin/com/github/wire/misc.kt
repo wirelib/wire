@@ -1,6 +1,6 @@
-package com.matteojoliveau.wire
+package com.github.wire
 
-import com.matteojoliveau.wire.exception.InvalidContextException
+import com.github.wire.exception.InvalidContextException
 
 fun buildUrl(url: String, method: String, params: Map<String, String> = mapOf()): String {
     val sb = StringBuilder("$url/$method")

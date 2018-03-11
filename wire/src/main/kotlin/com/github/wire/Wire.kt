@@ -1,14 +1,14 @@
-package com.matteojoliveau.wire
+package com.github.wire
 
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.matteojoliveau.wire.enums.MessageEntityType
-import com.matteojoliveau.wire.enums.UpdateType
-import com.matteojoliveau.wire.internal.ApiPoller
-import com.matteojoliveau.wire.internal.InMemoryDispatcher
-import com.matteojoliveau.wire.internal.UpdateDispatcher
-import com.matteojoliveau.wire.telegram.Telegram
+import com.github.wire.enums.MessageEntityType
+import com.github.wire.enums.UpdateType
+import com.github.wire.internal.ApiPoller
+import com.github.wire.internal.InMemoryDispatcher
+import com.github.wire.internal.UpdateDispatcher
+import com.github.wire.telegram.Telegram
 import io.reactivex.functions.Consumer
 import mu.KLogging
 import okhttp3.OkHttpClient

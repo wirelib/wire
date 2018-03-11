@@ -1,9 +1,9 @@
-package com.matteojoliveau.wire.internal
+package com.github.wire.internal
 
 import com.github.salomonbrys.kotson.fromJson
 import com.google.gson.Gson
-import com.matteojoliveau.wire.buildUrl
-import com.matteojoliveau.wire.exception.TelegramException
+import com.github.wire.buildUrl
+import com.github.wire.exception.TelegramException
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.telegram.ResponseWrapper
