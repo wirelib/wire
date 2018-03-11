@@ -2,6 +2,7 @@ package com.matteojoliveau.wire.internal
 
 import com.matteojoliveau.wire.Context
 import com.matteojoliveau.wire.ContextCallback
+import com.matteojoliveau.wire.Middleware
 import com.matteojoliveau.wire.enums.MessageEntityType
 import com.matteojoliveau.wire.enums.UpdateType
 import com.matteojoliveau.wire.telegram.Telegram
@@ -39,9 +40,11 @@ class InMemoryDispatcher(val telegram: Telegram) : UpdateDispatcher {
         fallback = callback
     }
 
-    override fun dispatch(update: Update) {
-        val ctx = Context(update, telegram, mapUpdateType(update))
+    override fun dispatch(update: Update) = dispatch(update, listOf())
 
+    override fun dispatch(update: Update, middlewares: List<Middleware>) {
+        val ctx = Context(update, telegram, mapUpdateType(update))
+        runMiddlewares(ctx, middlewares)
         when (ctx.updateType) {
             UpdateType.MESSAGE -> dispatchMessage(ctx)
             UpdateType.CALLBACK_QUERY -> {
@@ -57,9 +60,12 @@ class InMemoryDispatcher(val telegram: Telegram) : UpdateDispatcher {
             if (message.entities?.isEmpty() == false) {
                 dispatchEntities(ctx)
             }
+            val botCommands = message.entities?.filter { MessageEntityType.BOT_COMMAND.name.equals(it.type, true) }
+                    ?: listOf()
             val text = message.text ?: ""
-            if (text.startsWith("/")) {
-                (commands[text] ?: fallback)(ctx)
+            if (!commands.isEmpty()) {
+                val (_, offset, length, _, _) = botCommands[0]
+                (commands[text.substring(offset, offset + length)] ?: fallback)(ctx)
             } else {
                 println("")
                 (textListeners.entries.firstOrNull { it.key.matches(text) }?.value ?: fallback)(ctx)
@@ -85,5 +91,25 @@ class InMemoryDispatcher(val telegram: Telegram) : UpdateDispatcher {
         update.editedChannelPost != null -> UpdateType.EDITED_CHANNEL_POST
         else -> UpdateType.UNKNOWN
     }
+
+    private fun runMiddlewares(context: Context, middlewares: List<Middleware>) {
+        var index = -1
+        if (middlewares.isEmpty()) return
+
+        fun execute(i: Int, ctx: Context) {
+            if (i <= index) TODO()
+            if (middlewares.isEmpty()) return
+            if (middlewares.size == 1)  middlewares[0](context) {}
+            index = i
+            if (middlewares.size >= i +1) {
+                val middleware = middlewares[i]
+                middleware(context) { c -> execute(i + 1, c ?: ctx) }
+            }
+        }
+
+        execute(0, context)
+    }
+
+
 
 }

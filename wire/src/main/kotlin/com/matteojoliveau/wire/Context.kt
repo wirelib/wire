@@ -1,10 +1,11 @@
 package com.matteojoliveau.wire
 
+import com.matteojoliveau.wire.enums.ParseMode
 import com.matteojoliveau.wire.enums.UpdateType
-import com.matteojoliveau.wire.exception.InvalidContextException
 import com.matteojoliveau.wire.telegram.Telegram
 import org.telegram.InlineQuery
 import org.telegram.Message
+import org.telegram.ReplyMarkup
 import org.telegram.Update
 
 data class Context(
@@ -24,9 +25,34 @@ data class Context(
     val chat = update.message?.chat
     val from = update.message?.from
 
+    private val custom = mutableMapOf<String, Any>()
+
     val mentions: List<String>
         get() = message?.entities?.map { message.text?.substring(it.offset, it.offset + it.length) ?: "" }
                 ?: listOf()
 
-    fun reply(text: String) = telegram.sendMessage(chat?.id?.toString() ?: throw InvalidContextException("Cannot reply without a chat object"), text)
+    fun reply(text: String, replyMarkup: ReplyMarkup? = null,
+              disableWebPagePreview: Boolean? = null,
+              disableNotification: Boolean? = null,
+              replyToMessageId: Int? = null) = telegram.sendMessage(
+            chat?.id?.toString() ?: callbackQuery?.message?.chat?.id?.toString() ?: callbackQuery?.chatInstance
+            ?: throwInvalid("chat"),
+            text, null, disableWebPagePreview, disableNotification, replyToMessageId, replyMarkup)
+
+    fun replyWithHtml(text: String, replyMarkup: ReplyMarkup? = null,
+                      disableWebPagePreview: Boolean? = null,
+                      disableNotification: Boolean? = null,
+                      replyToMessageId: Int? = null) = telegram.sendMessage(
+            chat?.id?.toString() ?: callbackQuery?.message?.chat?.id?.toString() ?: callbackQuery?.chatInstance
+            ?: throwInvalid("chat"),
+            text, ParseMode.HTML, disableWebPagePreview, disableNotification, replyToMessageId, replyMarkup)
+
+    fun answerCallbackQuery(text: String? = null, showAlert: Boolean? = null, url: String? = null, cacheTime: Int? = null) = telegram.answerCallbackQuery(update.callbackQuery?.id
+            ?: throwInvalid("callback query"), text, showAlert, url, cacheTime)
+
+    operator fun set(key: String, value: Any) {
+        custom[key] = value
+    }
+    operator fun get(key: String) = custom[key]
+
 }

@@ -1,4 +1,4 @@
-package com.matteojoliveau.wire.enums
+package com.matteojoliveau.wire
 
 import okhttp3.MediaType
 

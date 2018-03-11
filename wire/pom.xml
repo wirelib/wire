@@ -4,7 +4,8 @@
     <parent>
         <artifactId>wire-parent</artifactId>
         <groupId>com.matteojoliveau.wire</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../wire-parent</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -12,56 +13,47 @@
     <artifactId>wire</artifactId>
     <packaging>jar</packaging>
 
-    <name>com.matteojoliveau.wire wire</name>
+    <name>Wire</name>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kotlin.version>1.2.30</kotlin.version>
-        <junit.version>4.12</junit.version>
-    </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
-            <version>${kotlin.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test-junit</artifactId>
-            <version>${kotlin.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>3.10.0</version>
         </dependency>
         <dependency>
             <groupId>io.reactivex.rxjava2</groupId>
             <artifactId>rxjava</artifactId>
-            <version>2.1.10</version>
         </dependency>
         <dependency>
             <groupId>com.github.salomonbrys.kotson</groupId>
             <artifactId>kotson</artifactId>
-            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>io.github.microutils</groupId>
             <artifactId>kotlin-logging</artifactId>
-            <version>1.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.wirelib</groupId>
+            <artifactId>telegram-models</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.25</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -89,39 +81,6 @@
                         <goals>
                             <goal>test-compile</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.matteojoliveau.wire</groupId>
-                <artifactId>telegram-classes-maven-plugin</artifactId>
-                <version>1.0-SNAPSHOT</version>
-                <executions>
-                    <execution>
-                        <id>generate-telegram-classes</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.build.directory}/generated-sources/telegram</source>
-                            </sources>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

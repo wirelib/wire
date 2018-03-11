@@ -5,8 +5,11 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.matteojoliveau.wire.enums.MessageEntityType
 import com.matteojoliveau.wire.enums.UpdateType
-import com.matteojoliveau.wire.internal.*
+import com.matteojoliveau.wire.internal.ApiPoller
+import com.matteojoliveau.wire.internal.InMemoryDispatcher
+import com.matteojoliveau.wire.internal.UpdateDispatcher
 import com.matteojoliveau.wire.telegram.Telegram
+import io.reactivex.functions.Consumer
 import mu.KLogging
 import okhttp3.OkHttpClient
 import org.telegram.Update
@@ -18,6 +21,7 @@ class Wire(token: String, apiUrl: String = "${Constants.TELEGRAM_API_URL}$token"
     private val gson = gson()
     private val telegram = Telegram(client, gson, apiUrl, ApiPoller(client, gson, apiUrl))
     private val dispatcher = dispatcher(telegram)
+    private val middlewares = mutableListOf<Middleware>()
 
     private fun httpClient(): OkHttpClient = OkHttpClient()
 
@@ -26,6 +30,13 @@ class Wire(token: String, apiUrl: String = "${Constants.TELEGRAM_API_URL}$token"
             .create()
 
     private fun dispatcher(telegram: Telegram): UpdateDispatcher = InMemoryDispatcher(telegram)
+
+    fun use(vararg m: Middleware) {
+        middlewares.addAll(m)
+    }
+    fun use(middleware: Middleware) {
+        middlewares.add(middleware)
+    }
 
     fun onCommand(command: String, callback: ContextCallback): Wire {
         register("/$command", callback)
@@ -74,8 +85,16 @@ class Wire(token: String, apiUrl: String = "${Constants.TELEGRAM_API_URL}$token"
         }
     }
 
+    fun catch(handler: Consumer<in Throwable>) {
+        telegram.catch(handler)
+    }
+
+    fun catch(handler: (t: Throwable) -> Unit) {
+        telegram.catch(Consumer {handler(it)})
+    }
+
     private fun dispatch(update: Update) {
-        dispatcher.dispatch(update)
+        dispatcher.dispatch(update, middlewares)
     }
 
     private fun onError(t: Throwable) = logger.error(t) { t.message }

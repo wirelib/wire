@@ -3,6 +3,7 @@ package com.matteojoliveau.wire.internal
 import com.github.salomonbrys.kotson.fromJson
 import com.google.gson.Gson
 import com.matteojoliveau.wire.buildUrl
+import com.matteojoliveau.wire.exception.TelegramException
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.telegram.ResponseWrapper
@@ -14,16 +15,18 @@ class ApiPoller(private val http: OkHttpClient, private val gson: Gson, private 
         val params = mutableMapOf("timeout" to 1.toString(), "offset" to lastOffset.toString())
         val request = requestBuilder("getUpdates", params).build()
         val response = http.newCall(request).execute()
-        val json = response.body()?.string() ?: "{}"
+        val body = response.body()
+        val json = body?.string() ?: "{}"
+        response.close()
         val wrapper: ResponseWrapper<Array<Update>> = gson.fromJson(json)
         return if (wrapper.ok) {
-            val updates = wrapper.result.toList()
+            val updates = wrapper.result?.toList() ?: listOf()
             updates.forEach {
                 lastOffset = it.updateId + 1
             }
             updates
         } else {
-            emptyList()
+            throw TelegramException from wrapper
         }
     }
 
