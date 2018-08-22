@@ -8,6 +8,7 @@ import com.github.wire.enums.UpdateType
 import com.github.wire.telegram.Telegram
 import mu.KLogging
 import org.telegram.Update
+import java.util.regex.Pattern
 
 class InMemoryDispatcher(val telegram: Telegram) : UpdateDispatcher {
     companion object : KLogging()
@@ -18,12 +19,13 @@ class InMemoryDispatcher(val telegram: Telegram) : UpdateDispatcher {
     private val textListeners = mutableMapOf<Regex, ContextCallback>()
     private val entities = mutableMapOf<MessageEntityType, ContextCallback>()
 
-    private var fallback: ContextCallback = { logger.debug { "Fallback - $it" } }
+    private var fallback: ContextCallback = ContextCallback { logger.debug { "Fallback - $it" } }
 
     override fun <T> register(key: T, callback: ContextCallback) {
         when (key) {
             is UpdateType -> updateTypes[key] = callback
             is Regex -> textListeners[key] = callback
+            is Pattern -> register(key.toRegex(), callback)
             is String -> registerString(key, callback)
             is MessageEntityType -> entities[key] = callback
         }
@@ -48,9 +50,9 @@ class InMemoryDispatcher(val telegram: Telegram) : UpdateDispatcher {
         when (ctx.updateType) {
             UpdateType.MESSAGE -> dispatchMessage(ctx)
             UpdateType.CALLBACK_QUERY -> {
-                (actions[update.callbackQuery?.data] ?: updateTypes[UpdateType.CALLBACK_QUERY] ?: fallback)(ctx)
+                (actions[update.callbackQuery?.data] ?: updateTypes[UpdateType.CALLBACK_QUERY] ?: fallback).run(ctx)
             }
-            else -> fallback(ctx)
+            else -> fallback.run(ctx)
         }
     }
 
@@ -63,19 +65,18 @@ class InMemoryDispatcher(val telegram: Telegram) : UpdateDispatcher {
             val botCommands = message.entities?.filter { MessageEntityType.BOT_COMMAND.name.equals(it.type, true) }
                     ?: listOf()
             val text = message.text ?: ""
-            if (!commands.isEmpty()) {
+            if (commands.isNotEmpty() && botCommands.isNotEmpty()) {
                 val (_, offset, length, _, _) = botCommands[0]
-                (commands[text.substring(offset, offset + length)] ?: fallback)(ctx)
+                (commands[text.substring(offset, offset + length)] ?: fallback).run(ctx)
             } else {
-                println("")
-                (textListeners.entries.firstOrNull { it.key.matches(text) }?.value ?: fallback)(ctx)
+                (textListeners.entries.firstOrNull { it.key.matches(text) }?.value ?: fallback).run(ctx)
             }
         }
     }
 
     private fun dispatchEntities(ctx: Context) {
         ctx.message?.entities?.forEach {
-            (entities[MessageEntityType.valueOf(it.type.toUpperCase())] ?: fallback)(ctx)
+            (entities[MessageEntityType.valueOf(it.type.toUpperCase())] ?: fallback).run(ctx)
         }
     }
 
@@ -99,11 +100,11 @@ class InMemoryDispatcher(val telegram: Telegram) : UpdateDispatcher {
         fun execute(i: Int, ctx: Context) {
             if (i <= index) TODO()
             if (middlewares.isEmpty()) return
-            if (middlewares.size == 1)  middlewares[0](context) {}
+            if (middlewares.size == 1)  middlewares[0].run(context) {}
             index = i
             if (middlewares.size >= i +1) {
                 val middleware = middlewares[i]
-                middleware(context) { c -> execute(i + 1, c ?: ctx) }
+                middleware.run(context) { c -> execute(i + 1, c ?: ctx) }
             }
         }
 

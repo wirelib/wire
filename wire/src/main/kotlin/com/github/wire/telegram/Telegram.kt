@@ -14,18 +14,18 @@ import okhttp3.*
 import org.telegram.*
 import java.util.concurrent.TimeUnit
 
-class Telegram(val http: OkHttpClient, private val gson: Gson, val url: String, private val poller: Poller) {
+class Telegram(private val http: OkHttpClient, private val gson: Gson, private val url: String, private val poller: Poller) {
     companion object : KLogging()
 
     private var errorHandler: Consumer<in Throwable> = Consumer { logger.error(it) { it.message } }
 
-    internal fun start(): Observable<Update> {
+    fun start(): Observable<Update> {
         return Observable.interval(2, TimeUnit.SECONDS)
                 .map { poller.poll() }
                 .flatMapIterable { it }
     }
 
-    internal fun catch(handler: Consumer<in Throwable>) {
+    fun catchError(handler: Consumer<in Throwable>) {
         errorHandler = handler
     }
 
